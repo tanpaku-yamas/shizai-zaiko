@@ -186,6 +186,9 @@ footer{max-width:640px;margin:0 auto;padding:4px 14px 18px;font-size:.64rem;colo
     </div>
     <div id="itmList"></div>
     <div class="util" style="margin-top:10px" id="addBox"></div>
+    <div class="util" style="margin-top:8px">
+      <button class="btn ghost" onclick="resetStocks(this)">在庫数をリセット(全品目0にする)</button>
+    </div>
     <div class="pool-note">※ ファイルdeバッグと説明会封筒は<b>合算在庫</b>で判定します(どちらを持参してもOK)。合算の発注点はファイルdeバッグ側の値を使用。実施済み処理ではバッグ優先で減算します。</div>
   </div>
   <div class="card">
@@ -233,7 +236,7 @@ footer{max-width:640px;margin:0 auto;padding:4px 14px 18px;font-size:.64rem;colo
     </div></details>
     <details><summary>2. 予定タブの見方</summary><div class="a">
       各行の右端は予定人数。<b>NM</b>/<b>G4</b>チップはH列(主品目)からの自動判定です。行をタップすると、その説明会に必要な資材の内訳が開きます。赤枠+「資材不足」は、その説明会で使う資材のどれかが発注点割れしているサインです。<br>
-      取り込みのたびに<b>未実施の予定は最新のExcel内容で置き換え</b>られます(実施済みの記録は保持)。今日より前の行は取り込み時にスキップされます。
+      取り込みのたびに<b>未実施の予定は最新のExcel内容で置き換え</b>られます(実施済みの記録は保持)。今日より前の行は取り込み時にスキップされます。間違ったファイルを読み込んだ時などは<b>「予定をリセット」</b>(2度押しで実行)で未実施の予定だけを全消去できます。在庫数と実施済みの記録には影響しません。
     </div></details>
     <details><summary>3. 在庫ゲージの見方</summary><div class="a">
       濃い色=<b>引当後に残る在庫</b>、斜線=今後の説明会に引き当てられている分、縦線=発注点。濃い色が赤い時は、引当後の残りが発注点を下回っています。
@@ -263,7 +266,7 @@ footer{max-width:640px;margin:0 auto;padding:4px 14px 18px;font-size:.64rem;colo
       日付が過ぎたのに実施済みチェックされていない予定です。引当からは自動で外れていますが、<b>在庫の減算がまだ</b>なので、実施したなら「実施済みにする」、中止なら削除してください。ここを放置すると在庫数が実態とズレます。
     </div></details>
     <details><summary>実在庫と数字が合わない</summary><div class="a">
-      在庫タブで実数に直接書き換えてください(数値欄をタップ)。ズレの主因は①実施済みチェック漏れ ②説明会以外での資材使用(単発の面談持参など)。②が多いなら、使った分をその都度−ボタンで引くのを習慣に。
+      在庫タブで実数に直接書き換えてください(数値欄をタップ)。ズレの主因は①実施済みチェック漏れ ②説明会以外での資材使用(単発の面談持参など)。②が多いなら、使った分をその都度−ボタンで引くのを習慣に。大きくズレて数え直したい時は<b>「在庫数をリセット」</b>(2度押しで実行)で全品目を0にしてから実数を入れ直すのが早いです。品目・発注点・予定には影響しません。
     </div></details>
     <details><summary>バッグと封筒の「合算」って?</summary><div class="a">
       説明会1回につきどちらかを人数分持参すればよいため、2品目の在庫合計で足りるかを判定しています。合算の発注点は上に表示される側(ファイルdeバッグ)の値を使用。実施済み処理ではバッグから優先して減算します。
@@ -609,6 +612,12 @@ function undoDone(id){
 function delEv(id,btn){
   if(!arm(btn,'本当に削除?'))return;
   state.events=state.events.filter(e=>e.id!==id);render();toast('予定を削除しました');
+}
+function resetStocks(btn){
+  if(!state.items.some(i=>i.stock>0)){toast('在庫はすべて0です');return}
+  if(!arm(btn,'本当にリセット?(全在庫0)'))return;
+  state.items.forEach(i=>i.stock=0);
+  render();toast('全品目の在庫を0にしました(品目・発注点・予定は保持)');
 }
 function resetEvents(btn){
   const undone=state.events.filter(e=>!e.done);
