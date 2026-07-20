@@ -160,6 +160,9 @@ footer{max-width:640px;margin:0 auto;padding:4px 14px 18px;font-size:.64rem;colo
       <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
     </div>
     <div id="importMsg"></div>
+    <div class="util" style="margin-top:10px">
+      <button class="btn ghost" onclick="resetEvents(this)">予定をリセット(未実施のみ消去)</button>
+    </div>
   </div>
 
   <div class="card">
@@ -607,6 +610,14 @@ function delEv(id,btn){
   if(!arm(btn,'本当に削除?'))return;
   state.events=state.events.filter(e=>e.id!==id);render();toast('予定を削除しました');
 }
+function resetEvents(btn){
+  const undone=state.events.filter(e=>!e.done);
+  if(!undone.length){toast('未実施の予定はありません');return}
+  if(!arm(btn,'本当にリセット?('+undone.length+'件消去)'))return;
+  state.events=state.events.filter(e=>e.done); // 実施済みの記録は保持
+  render();toast(undone.length+'件の予定を消去しました(在庫・実施済みは保持)');
+  const m=document.getElementById('importMsg');m.className='';m.textContent='';
+}
 function bump(id,d){const it=state.items.find(i=>i.id===id);it.stock=Math.max(0,it.stock+d);render()}
 function setStock(id,v){const it=state.items.find(i=>i.id===id);it.stock=Math.max(0,parseInt(v,10)||0);render()}
 function renameItem(id,v){const it=state.items.find(i=>i.id===id);if(v.trim())it.name=v.trim();render()}
@@ -701,4 +712,3 @@ render();
 </script>
 </body>
 </html>
-Commit changes
